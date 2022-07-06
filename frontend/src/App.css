@@ -1,3 +1,73 @@
+@font-face {
+  font-family: 'Poppins';
+  font-style: thin;
+  font-weight: 100;
+  src: url('./assets/fonts/Poppins-Thin.ttf');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: lighter;
+  font-weight: 200;
+  src: url('./assets/fonts/Poppins-ExtraLight.ttf');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: light;
+  font-weight: 300;
+  src: url('./assets/fonts/Poppins-Light.ttf');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: regular;
+  font-weight: 400;
+  src: url('./assets/fonts/Poppins-Regular.ttf');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: medium;
+  font-weight: 500;
+  src: url('./assets/fonts/Poppins-Medium.ttf');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: semiBold;
+  font-weight: 600;
+  src: url('./assets/fonts/Poppins-SemiBold.ttf');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: bold;
+  font-weight: 700;
+  src: url('./assets/fonts/Poppins-Bold.ttf');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: bolder;
+  font-weight: 800;
+  src: url('./assets/fonts/Poppins-ExtraBold.ttf');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: black;
+  font-weight: 900;
+  src: url('./assets/fonts/Poppins-Black.ttf');
+}
+
+body {
+  font-family: Poppins !important;
+  position: relative;
+  margin: 0;
+  text-transform: none;
+}
+
 .App {
   padding: 20px;
   background-color: #141414;
@@ -10,7 +80,6 @@
   overflow-y: hidden;
   flex-direction: column;
   position: relative;
-  font-family: Sen;
 }
 
 .label {
@@ -31,6 +100,7 @@
   align-items: center;
   justify-content: center;
   text-align: center;
+  flex-direction: column;
 }
 
 Button {
@@ -65,4 +135,157 @@ Button {
 .bottom-block {
   position: fixed;
   bottom: 10px;
+}
+
+/*customize scrollbar css*/
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: #1414148c;
+}
+
+::-webkit-scrollbar-thumb {
+  box-shadow: inset 0 0 6px #fcfcfc;
+}
+
+.button {
+  font-size: 20px !important;
+  --__internal__border-color: var(--web-ui_button-border-color, #fcfcfc);
+  background: #141414;
+  border: solid transparent;
+  border-radius: var(--web-ui_button-border-radius, 12px);
+  border-width: 2px 2px 4px;
+  color: var(--web-ui_button-color, #fcfcfc);
+  height: var(--web-ui_button-height, 50px);
+  padding: var(--web-ui_button-padding, 0 30px);
+  transition: filter .2s;
+  user-select: none;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  display: inline-flex;
+  outline: none;
+  position: relative;
+  touch-action: manipulation;
+  transform: translateZ(0);
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  align-items: center;
+  font: 700var(--web-ui_button-font-size, 15px)/var(--web-ui_button-line-height, 1.2) din-round, sans-serif;
+  justify-content: center;
+  letter-spacing: .8px;
+  text-decoration: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.button-accent {
+  --__internal__border-color: var(--web-ui_button-border-color, #6FCF97);
+}
+
+.button-warning {
+  --__internal__border-color: var(--web-ui_button-border-color, #D22630);
+}
+
+.button:before,
+.button:active:not(:disabled):before,
+.button:disabled:before {
+  box-shadow: none;
+}
+
+.bg-success1::before {
+  background-color: #6FCF97 !important;
+}
+
+.button::before {
+  background-color: var(--web-ui_button-background-color, #141414);
+  border: 2px solid var(--__internal__border-color);
+  border-radius: var(--web-ui_button-border-radius, 12px);
+  bottom: -2px;
+  box-shadow: 0 2px 0 var(--__internal__border-color);
+  content: "";
+  left: -2px;
+  position: absolute;
+  right: -2px;
+  top: -2px;
+  z-index: -1;
+}
+
+.button:active {
+  transform: translateY(2px) translateZ(0);
+}
+
+@media (hover: hover) {
+  .button {
+    filter: var(--web-ui_button-filter-hover, brightness(.9));
+  }
+}
+
+button.btn-link {
+  color: #fcfcfc;
+  font-size: 18px !important;
+}
+
+.btn-link:hover {
+  color: #6FCF97 !important;
+}
+
+.btn-check:focus+.btn, .btn:focus {
+  box-shadow: none !important;
+}
+
+button {
+  font-weight: 500 !important;
+}
+
+.saved-moments {
+  display: flex;
+  margin-top: 12px;
+}
+
+.d-flex {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.moments-list {
+  display: flex;
+  flex-direction: column;
+  margin-top: 18px;
+  max-height: 200px;
+  overflow-y: scroll;
+}
+
+.moment-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid #fcfcfc;
+  margin-bottom: 8px;
+}
+
+.moment-item .moment-name {
+  width: 170px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.moment-name:hover {
+  white-space: pre-wrap;
+  overflow: unset;
+}
+
+.moment-item > div {
+  margin-right: 10px;
+}
+
+.no-moment {
+  margin-top: 18px;;
 }

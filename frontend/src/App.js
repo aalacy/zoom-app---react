@@ -2,11 +2,16 @@
 import { useLocation, useHistory } from "react-router-dom";
 import { useCallback, useEffect, useState } from "react";
 import Button from "react-bootstrap/Button";
+import {
+  TrashIcon,
+  ChevronDoubleDownIcon,
+  ChevronDoubleUpIcon,
+} from '@heroicons/react/solid';
 
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-import { RECORDING_ACTION, MOMENT_ACTION, getTimestamp } from './util'
+import { RECORDING_ACTION, MOMENT_ACTION, getTimestamp, _T } from './util'
 import Clock from "./components/Clock";
 
 let once = 0; // to prevent increasing number of event listeners being added
@@ -29,6 +34,7 @@ function App() {
   const [curMoment, setCurMoment] = useState({ action: MOMENT_ACTION.STANDBY })
   const [momentData, setMomentData] = useState({})
   const [userContext, setUserContext] = useState()
+  const [showMoments, setShowMoments] = useState(false)
 
   const beforeRecording = meetingContext?.meetingID && (!recordingContext || recordingContext?.action === RECORDING_ACTION.STOPPED || recordingContext?.action === RECORDING_ACTION.PAUSED)
   const recordingStarted = recordingContext?.action === RECORDING_ACTION.STARTED
@@ -132,7 +138,7 @@ function App() {
         setError(null);
       });
     }
-  }, [recordingContext, recordingContext?.action])
+  }, [recordingContext?.action])
 
   const controlCloudRecording = (_action = "start") => {
     console.log('startCloudRecording')
@@ -543,6 +549,19 @@ function App() {
     })
   }
 
+  const toggleMoments = (e) => {
+    e.stopPropagation();
+    setShowMoments(!showMoments)
+  }
+
+  const deleteMoment = (i) => {
+    momentData.moments.splice(i, 1)
+    const _momentData = {
+      ...momentData
+    }
+    setMomentData(_momentData)
+  }
+
   if (!runningContext) {
     return (
       <div className="App">
@@ -560,7 +579,7 @@ function App() {
           Please install the app first
         </div>
 
-        <Button variant="outline-primary" onClick={authorize}> authorize</Button>
+        <button className="button" onClick={authorize}> authorize</button>
       </div>
     )
   }
@@ -578,19 +597,18 @@ function App() {
         {(momentStarted) && <Clock />}
       </div>
       <div className="button-block">
-        {(beforeRecording || momentSaved) && <Button variant="outline-primary" onClick={() => controlCloudRecording()} disabled={meetingContext?.meetingID === undefined} size="lg">
+        {(beforeRecording || momentSaved) && <button className="button" onClick={() => controlCloudRecording()} disabled={meetingContext?.meetingID === undefined} size="lg">
           start
-        </Button>
+        </button>
         }
 
-        {beforeStartMoment && <Button variant="outline-success" onClick={startMoment} disabled={meetingContext?.meetingID === undefined} size="lg">
+        {beforeStartMoment && <button className="button button-accent" onClick={startMoment} disabled={meetingContext?.meetingID === undefined} size="lg">
           start moment
-        </Button>}
+        </button>}
 
-        {momentStarted && <Button variant="outline-danger" onClick={endMoment} disabled={meetingContext?.meetingID === undefined} size="lg">
+        {momentStarted && <button className="button button-warning" onClick={endMoment} disabled={meetingContext?.meetingID === undefined} size="lg">
           end moment
-        </Button>}
-
+        </button>}
 
         {
           momentEnded && (
@@ -602,20 +620,58 @@ function App() {
                 onChange={handleChangeName}
               />
               <div>
-                <Button variant="success" onClick={sendToOx} size="lg" disabled={!curMoment?.name}>
+                <button className="button bg-success1" onClick={sendToOx} size="lg" disabled={!curMoment?.name}>
                   send to Ox
-                </Button>
+                </button>
               </div>
             </div>
           )
         }
 
+        {
+          (recordingStarted || recordingPaused) && <div className="saved-moments">
+              <Button variant="link" onClick={toggleMoments}>saved moments 
+              {showMoments ? <ChevronDoubleUpIcon
+                  title="Show Moments"
+                  onClick={toggleMoments}
+                  className="inline-block ml-2 cursor-pointer hover:text-accent active:text-accent"
+                  width={20}
+                /> : <ChevronDoubleDownIcon
+                className="inline-block ml-2 cursor-pointer hover:text-accent active:text-accent"
+                width={20}
+              />}
+              </Button>
+              
+            </div>
+        }
       </div>
+      { showMoments && ( (!momentData?.moments || momentData?.moments?.length === 0) ? <div className="no-moment">no moments yet</div> : <div className="moments-list">
+          {momentData?.moments?.map((m, i) => {
+            return (
+              <div key={i} className="moment-item">
+                <div>{i+1}.</div>
+                <div className="moment-name">{m.name}</div>
+                <div className="d-flex">
+                  <div>{_T(m.startAt)}</div>
+                  &nbsp;-&nbsp;
+                  <div>{_T(m.endAt)}</div>
+                </div>
+                <Button variant="link" onClick={() => deleteMoment(i)}><TrashIcon
+                  className=""
+                  width={20}
+                /></Button>
+              </div>
+            )
+          })}
+        </div>)
+      }
       <div className="bottom-block button-block">
         {(recordingStarted || recordingPaused) && <Button variant="link" onClick={() => controlCloudRecording("stop")}>end Zoom recording</Button>}
       </div>
-      {/* <p>recordingContext {JSON.stringify(meetingContext)}</p>
-      <p>momentData {JSON.stringify(momentData)}</p> */}
+      {/* <p>recordingContext {JSON.stringify(recordingContext)}</p> */}
+      
+      {/* <p>momentData {JSON.stringify(momentData)}</p> */}
+      {/* <p>curmoment {JSON.stringify(curMoment)}</p>  */}
     </div>
   );
 }
