@@ -3,13 +3,21 @@ const zoomApi = require('../../util/zoom-api')
 const oxApi = require('../../util/ox-api')
 const zoomHelpers = require('../../util/zoom-helpers')
 const store = require('../../util/store')
+const encrypt = require('../../util/encrypt')
 
 module.exports = {
   async recordingWebhook(req, res, next) {
     try {
       console.log("==== webhook", JSON.stringify(req.body))
       let data = req.body
-      if (data.event != 'recording.completed' && data.event != "recording.transcript_completed"
+      if (data.event === 'endpoint.url_validation') {
+        const encryptedToken = encrypt.sha265Hash(data.payload.plainToken)
+        return res.status(200).json({
+          plainToken: data.payload.plainToken,
+          encryptedToken
+        })
+      }
+      else if (data.event != 'recording.completed' && data.event != "recording.transcript_completed"
       ) {
         return res.status(200).json({
           status: 'other event'
@@ -17,11 +25,11 @@ module.exports = {
       }
       try {
         const momentData = await store.getMomentData(data.payload.account_id)
-        console.log('webhook momentData saved in store', momentData)
         data = {
           ...data,
           momentData
         }
+        console.log('ox data: ', JSON.stringify(data))
         await oxApi.sendMomentData2Ox(JSON.stringify(data))
         return res.status(200).json({
           status: 'ok'
@@ -42,12 +50,24 @@ module.exports = {
       console.log("save momentData into store", momentData)
       await store.upsertMomentData(momentData.user.account_id, momentData)
 
-      return res.json({
+      return res.status(200).json({
         state: "ok",
       })
       
     } catch (error) {
       return next(error)
+    }
+  },
+
+  async deauthorizeApp(req, res, next) {
+    try {
+      const deauthData = req.body
+      console.log("ox zoom app was removed ", deauthData, req.headers)
+      return res.json({
+        state: "ok",
+      })
+    } catch (err) {
+      return next(err)
     }
   },
 

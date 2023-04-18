@@ -6,12 +6,12 @@ import {
   TrashIcon,
   ChevronDoubleDownIcon,
   ChevronDoubleUpIcon,
-} from '@heroicons/react/solid';
+} from "@heroicons/react/solid";
 
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-import { RECORDING_ACTION, MOMENT_ACTION, getTimestamp, _T } from './util'
+import { RECORDING_ACTION, MOMENT_ACTION, getTimestamp, _T } from "./util";
 import Clock from "./components/Clock";
 
 let once = 0; // to prevent increasing number of event listeners being added
@@ -20,7 +20,6 @@ function App() {
   const location = useLocation();
   const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
-  const [info, setInfo] = useState({})
   const [userAuthorized, setUserAuthorized] = useState(null);
   const [showInClientOAuthPrompt, setShowInClientOAuthPrompt] = useState(false);
   const [runningContext, setRunningContext] = useState(null);
@@ -29,21 +28,30 @@ function App() {
   const [preMeeting, setPreMeeting] = useState(true); // start with pre-meeting code
   const [inGuestMode, setInGuestMode] = useState(false);
   const [userContextStatus, setUserContextStatus] = useState("");
-  const [meetingContext, setMeetingContext] = useState(null)
-  const [recordingContext, setRecordingContext] = useState()
-  const [curMoment, setCurMoment] = useState({ action: MOMENT_ACTION.STANDBY })
-  const [momentData, setMomentData] = useState({})
-  const [userContext, setUserContext] = useState()
-  const [showMoments, setShowMoments] = useState(false)
+  const [meetingContext, setMeetingContext] = useState(null);
+  const [recordingContext, setRecordingContext] = useState();
+  const [curMoment, setCurMoment] = useState({ action: MOMENT_ACTION.STANDBY });
+  const [momentData, setMomentData] = useState({});
+  const [showMoments, setShowMoments] = useState(false);
 
-  const beforeRecording = meetingContext?.meetingID && (!recordingContext || recordingContext?.action === RECORDING_ACTION.STOPPED || recordingContext?.action === RECORDING_ACTION.PAUSED)
-  const recordingStarted = recordingContext?.action === RECORDING_ACTION.STARTED
-  const recordingStopped = recordingContext?.action === RECORDING_ACTION.STOPPED
-  const recordingPaused = recordingContext?.action === RECORDING_ACTION.PAUSED
-  const beforeStartMoment = recordingStarted && curMoment?.action === MOMENT_ACTION.STANDBY
-  const momentStarted = recordingStarted && curMoment?.action === MOMENT_ACTION.STARTED
-  const momentEnded = (recordingStarted || recordingStopped || recordingPaused) && curMoment?.action === MOMENT_ACTION.ENDED
-  const momentSaved = curMoment?.action === MOMENT_ACTION.SAVED
+  const beforeRecording =
+    meetingContext?.meetingID &&
+    (!recordingContext ||
+      recordingContext?.action === RECORDING_ACTION.STOPPED ||
+      recordingContext?.action === RECORDING_ACTION.PAUSED);
+  const recordingStarted =
+    recordingContext?.action === RECORDING_ACTION.STARTED;
+  const recordingStopped =
+    recordingContext?.action === RECORDING_ACTION.STOPPED;
+  const recordingPaused = recordingContext?.action === RECORDING_ACTION.PAUSED;
+  const beforeStartMoment =
+    recordingStarted && curMoment?.action === MOMENT_ACTION.STANDBY;
+  const momentStarted =
+    recordingStarted && curMoment?.action === MOMENT_ACTION.STARTED;
+  const momentEnded =
+    (recordingStarted || recordingStopped || recordingPaused) &&
+    curMoment?.action === MOMENT_ACTION.ENDED;
+  const momentSaved = curMoment?.action === MOMENT_ACTION.SAVED;
 
   const getMeetingContext = useCallback(() => {
     zoomSdk
@@ -52,8 +60,19 @@ function App() {
         console.log("Meeting Context", ctx);
         setMeetingContext({
           ...ctx,
-          startTime: getTimestamp()
-        })
+          startTime: getTimestamp(),
+        });
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  }, []);
+
+  const openOx = useCallback(() => {
+    zoomSdk
+      .openUrl({ url: "https://app.ox.work" })
+      .then(() => {
+        console.log("Opened URL successfully");
       })
       .catch((e) => {
         console.log(e);
@@ -66,60 +85,52 @@ function App() {
       .then((ctx) => {
         console.log("Recording Context", ctx);
         setRecordingContext({
-          action: ctx.cloudRecordingStatus
-        })
+          action: ctx.cloudRecordingStatus,
+        });
       })
       .catch((e) => {
         console.log(e);
-      });
-  }, []);
-
-  const getUserContext = useCallback(() => {
-    zoomSdk
-      .getUserContext()
-      .then((ctx) => {
-        console.log("User Context", ctx);
-        setUserContext(ctx)
-      })
-      .catch((e) => {
-        console.log(e);
-        setInfo(e)
       });
   }, []);
 
   const sendToOx = () => {
-    momentData.meeting = meetingContext
+    momentData.meeting = meetingContext;
     momentData.user = {
       email: user.email,
-      account_id: user.account_id
-    }
+      account_id: user.account_id,
+    };
     if (!momentData.moments) {
-      momentData.moments = []
+      momentData.moments = [];
     }
     if (curMoment.action !== MOMENT_ACTION.STANDBY) {
       let _curMoment = {
         ...curMoment,
         action: MOMENT_ACTION.SAVED,
-      }
+      };
       if (curMoment.action === MOMENT_ACTION.STARTED) {
         _curMoment = {
           ..._curMoment,
-          endAt: getTimestamp()
-        }
+          endAt: getTimestamp(),
+        };
       }
-      momentData.moments.push(_curMoment)
+      momentData.moments.push(_curMoment);
       setCurMoment({
-        action: MOMENT_ACTION.STANDBY
-      })
+        action: MOMENT_ACTION.STANDBY,
+      });
     }
-    setMomentData(momentData)
-  }
+    setMomentData(momentData);
+  };
 
   useEffect(() => {
-    if (!user) return
+    if (!user) return;
 
-    if ((recordingContext?.action === RECORDING_ACTION.STOPPED || recordingContext?.action === RECORDING_ACTION.PAUSED) && !beforeStartMoment && !momentSaved) {
-      sendToOx()
+    if (
+      (recordingContext?.action === RECORDING_ACTION.STOPPED ||
+        recordingContext?.action === RECORDING_ACTION.PAUSED) &&
+      !beforeStartMoment &&
+      !momentSaved
+    ) {
+      sendToOx();
     }
 
     if (recordingContext?.action === RECORDING_ACTION.STOPPED) {
@@ -133,26 +144,25 @@ function App() {
         console.log(
           "momentData successfully store on the redis store in the backend. just waiting until the recordings available on the cloud"
         );
-        setMomentData({})
+        setMomentData({});
         // the error === string
         setError(null);
       });
     }
-  }, [recordingContext?.action])
+  }, [recordingContext?.action]);
 
   const controlCloudRecording = (_action = "start") => {
-    console.log('startCloudRecording')
-    setInfo({ info: "startCloudRecording" })
+    console.log("startCloudRecording");
     if (recordingContext.action === RECORDING_ACTION.PAUSED) {
-      _action = "resume"
+      _action = "resume";
     }
-    zoomSdk.cloudRecording({ action: _action })
+    zoomSdk
+      .cloudRecording({ action: _action })
       .then((ctx) => {
         console.log(ctx);
       })
       .catch((e) => {
         console.log(e);
-        setInfo(e)
       });
   };
 
@@ -161,15 +171,19 @@ function App() {
     zoomSdk.onCloudRecording((event) => {
       setRecordingContext({
         ...event,
-      })
-    })
-  }, [])
+      });
+    });
+  }, []);
 
   useEffect(() => {
     zoomSdk.onMeeting((event) => {
-      setMeetingContext(event)
+      console.log("onMeeting", event);
+      setMeetingContext({
+        ...event,
+        startTime: getTimestamp(),
+      });
     });
-  }, [])
+  }, []);
 
   const promptAuthorize = async () => {
     await zoomSdk
@@ -209,7 +223,6 @@ function App() {
     console.log(
       '2. Invoke authorize, eg zoomSdk.callZoomApi("authorize", authorizeOptions)'
     );
-    setInfo(authorizeOptions)
     zoomSdk
       .callZoomApi("authorize", authorizeOptions)
       .then((response) => {
@@ -258,7 +271,6 @@ function App() {
 
   useEffect(() => {
     zoomSdk.addEventListener("onMyUserContextChange", (event) => {
-      setInfo(event)
       setUserContextStatus(event.status);
     });
     async function fetchUser() {
@@ -291,7 +303,7 @@ function App() {
   }, [userAuthorized, userContextStatus]);
 
   const showNotification = useCallback(() => {
-    console.log('==showNotification===');
+    console.log("==showNotification===");
     async function showNotification() {
       try {
         await zoomSdk.showNotification({
@@ -348,35 +360,29 @@ function App() {
         // These items must be selected in the Features -> Zoom App SDK -> Add APIs tool in Marketplace
         const configResponse = await zoomSdk.config({
           capabilities: [
+            "getRecordingContext",
+            "openUrl",
             "getMeetingContext",
-            "getRunningContext",
-            "getSupportedJsApis",
-            "onSendAppInvitation",
-            "onShareApp",
             "cloudRecording",
             "onCloudRecording",
-            "showNotification",
-            "removeVirtualBackground",
-            "sendAppInvitation",
-            "getMeetingParticipants",
             "connect",
             "onConnect",
             "onMeeting",
             "postMessage",
             "onMessage",
-            "onActiveSpeakerChange",
             "authorize",
             "onAuthorized",
-            "promptAuthorize",
-            "getUserContext",
             "onMyUserContextChange",
           ],
-          version: '0.16.0'
+          version: "0.16.0",
         });
         console.log("App configured", configResponse);
         // The config method returns the running context of the Zoom App
         setRunningContext(configResponse.runningContext);
         setUserContextStatus(configResponse.auth.status);
+        getMeetingContext();
+        getRecordingContext();
+
         zoomSdk.onSendAppInvitation((data) => {
           console.log(data);
         });
@@ -388,9 +394,6 @@ function App() {
         setError("There was an error configuring the JS SDK");
       }
 
-      getMeetingContext()
-      getRecordingContext()
-      getUserContext()
       return () => {
         clearTimeout(configTimer);
       };
@@ -513,75 +516,73 @@ function App() {
 
   const momentBlock = (
     <>
-      {
-        beforeStartMoment && "save a moment"
-      }
-      {
-        momentStarted && "recording moment..."
-      }
-      {
-        momentEnded && "moment saved"
-      }
+      {beforeStartMoment && "save a moment"}
+      {momentStarted && "recording moment..."}
+      {momentEnded && "moment saved"}
     </>
-  )
+  );
 
   const startMoment = () => {
     setCurMoment({
-      name: "My saved moment",
+      name: "",
       action: MOMENT_ACTION.STARTED,
-      startAt: getTimestamp()
-    })
+      startAt: getTimestamp(),
+    });
   };
 
   const endMoment = () => {
     setCurMoment({
       ...curMoment,
-      name: "My saved moment",
+      name: "",
       action: MOMENT_ACTION.ENDED,
-      endAt: getTimestamp()
-    })
-  }
+      endAt: getTimestamp(),
+    });
+  };
 
   const handleChangeName = (e) => {
     setCurMoment({
       ...curMoment,
-      name: e.target.value
-    })
-  }
+      name: e.target.value,
+    });
+  };
 
   const toggleMoments = (e) => {
     e.stopPropagation();
-    setShowMoments(!showMoments)
-  }
+    setShowMoments(!showMoments);
+  };
 
   const deleteMoment = (i) => {
-    momentData.moments.splice(i, 1)
+    momentData.moments.splice(i, 1);
     const _momentData = {
-      ...momentData
-    }
-    setMomentData(_momentData)
-  }
+      ...momentData,
+    };
+    setMomentData(_momentData);
+  };
 
   if (!runningContext) {
     return (
       <div className="App">
-        <div className="label">
-          Please wait for a while
-        </div>
+        <div className="label">Please wait for a while</div>
       </div>
-    )
+    );
   }
 
-  if (!user) {
+  if (
+    runningContext === "inMeeting" &&
+    connected &&
+    preMeeting === false &&
+    userContextStatus !== "authorized"
+  ) {
     return (
       <div className="App">
-        <div className="label">
-          Please install the app first
-        </div>
+        <div className="label">Please authorize the app.</div>
 
-        <button className="button" onClick={authorize}> authorize</button>
+        <button className="button" onClick={authorize}>
+          {" "}
+          authorize
+        </button>
       </div>
-    )
+    );
   }
 
   return (
@@ -593,85 +594,118 @@ function App() {
 
         {!meetingContext?.meetingID && "Meeting is not started yet..."}
       </div>
-      <div className="count">
-        {(momentStarted) && <Clock />}
-      </div>
+      <div className="count">{momentStarted && <Clock />}</div>
       <div className="button-block">
-        {(beforeRecording || momentSaved) && <button className="button" onClick={() => controlCloudRecording()} disabled={meetingContext?.meetingID === undefined} size="lg">
-          start
-        </button>
-        }
+        {(beforeRecording || momentSaved) && (
+          <button
+            className="button"
+            onClick={() => controlCloudRecording()}
+            disabled={meetingContext?.meetingID === undefined}
+            size="lg"
+          >
+            start
+          </button>
+        )}
 
-        {beforeStartMoment && <button className="button button-accent" onClick={startMoment} disabled={meetingContext?.meetingID === undefined} size="lg">
-          start moment
-        </button>}
+        {beforeStartMoment && (
+          <button
+            className="button button-accent"
+            onClick={startMoment}
+            disabled={meetingContext?.meetingID === undefined}
+            size="lg"
+          >
+            start moment
+          </button>
+        )}
 
-        {momentStarted && <button className="button button-warning" onClick={endMoment} disabled={meetingContext?.meetingID === undefined} size="lg">
-          end moment
-        </button>}
+        {momentStarted && (
+          <button
+            className="button button-warning"
+            onClick={endMoment}
+            disabled={meetingContext?.meetingID === undefined}
+            size="lg"
+          >
+            end moment
+          </button>
+        )}
 
-        {
-          momentEnded && (
-            <div className="save-block">
-              <input
-                type="text"
-                placeholder="Enter Saved Moment"
-                value={curMoment.name}
-                onChange={handleChangeName}
-              />
-              <div>
-                <button className="button bg-success1" onClick={sendToOx} size="lg" disabled={!curMoment?.name}>
-                  send to Ox
-                </button>
-              </div>
+        {momentEnded && (
+          <div className="save-block">
+            <input
+              autoFocus
+              type="text"
+              placeholder="Enter Saved Moment"
+              value={curMoment.name}
+              onChange={handleChangeName}
+            />
+            <div>
+              <button
+                className="button bg-success1"
+                onClick={sendToOx}
+                size="lg"
+                disabled={!curMoment?.name}
+              >
+                send to Ox
+              </button>
             </div>
-          )
-        }
+          </div>
+        )}
 
-        {
-          (recordingStarted || recordingPaused) && <div className="saved-moments">
-              <Button variant="link" onClick={toggleMoments}>saved moments 
-              {showMoments ? <ChevronDoubleUpIcon
+        {(recordingStarted || recordingPaused) && (
+          <div className="saved-moments">
+            <Button variant="link" onClick={toggleMoments}>
+              saved moments
+              {showMoments ? (
+                <ChevronDoubleUpIcon
                   title="Show Moments"
                   onClick={toggleMoments}
                   className="inline-block ml-2 cursor-pointer hover:text-accent active:text-accent"
                   width={20}
-                /> : <ChevronDoubleDownIcon
-                className="inline-block ml-2 cursor-pointer hover:text-accent active:text-accent"
-                width={20}
-              />}
-              </Button>
-              
-            </div>
-        }
-      </div>
-      { showMoments && ( (!momentData?.moments || momentData?.moments?.length === 0) ? <div className="no-moment">no moments yet</div> : <div className="moments-list">
-          {momentData?.moments?.map((m, i) => {
-            return (
-              <div key={i} className="moment-item">
-                <div>{i+1}.</div>
-                <div className="moment-name">{m.name}</div>
-                <div className="d-flex">
-                  <div>{_T(m.startAt)}</div>
-                  &nbsp;-&nbsp;
-                  <div>{_T(m.endAt)}</div>
-                </div>
-                <Button variant="link" onClick={() => deleteMoment(i)}><TrashIcon
-                  className=""
+                />
+              ) : (
+                <ChevronDoubleDownIcon
+                  className="inline-block ml-2 cursor-pointer hover:text-accent active:text-accent"
                   width={20}
-                /></Button>
-              </div>
-            )
-          })}
-        </div>)
-      }
-      <div className="bottom-block button-block">
-        {(recordingStarted || recordingPaused) && <Button variant="link" onClick={() => controlCloudRecording("stop")}>end Zoom recording</Button>}
+                />
+              )}
+            </Button>
+          </div>
+        )}
       </div>
-      {/* <p>recordingContext {JSON.stringify(recordingContext)}</p> */}
-      
-      {/* <p>momentData {JSON.stringify(momentData)}</p> */}
-      {/* <p>curmoment {JSON.stringify(curMoment)}</p>  */}
+      {showMoments &&
+        (!momentData?.moments || momentData?.moments?.length === 0 ? (
+          <div className="no-moment">no moments yet</div>
+        ) : (
+          <div className="moments-list">
+            {momentData?.moments?.map((m, i) => {
+              return (
+                <div key={i} className="moment-item">
+                  <div>{i + 1}.</div>
+                  <div className="moment-name">{m.name}</div>
+                  <div className="d-flex">
+                    <div>{_T(m.startAt)}</div>
+                    &nbsp;-&nbsp;
+                    <div>{_T(m.endAt)}</div>
+                  </div>
+                  <Button variant="link" onClick={() => deleteMoment(i)}>
+                    <TrashIcon className="" width={20} />
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+        ))}
+      <div className="bottom-block button-block">
+        {(recordingStarted || recordingPaused) && (
+          <Button variant="link" onClick={() => controlCloudRecording("stop")}>
+            end Zoom recording
+          </Button>
+        )}
+
+        {/* <Button variant="link" onClick={openOx}>
+            Ox app
+        </Button> */}
+      </div>
     </div>
   );
 }

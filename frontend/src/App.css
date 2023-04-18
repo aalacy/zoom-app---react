@@ -126,6 +126,7 @@ Button {
   border: solid 1px #FCFCFC;
   border-radius: 4px;
   font-size: 22px;
+  width: 100%;
 }
 
 .save-block Button {

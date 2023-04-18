@@ -1,4 +1,4 @@
-const redis = require('redis')
+const redis = require('ioredis')
 const encrypt = require('./encrypt')
 const util = require('util')
 /**
@@ -10,9 +10,7 @@ const util = require('util')
  * of persistence.
  */
 
-const db = redis.createClient({
-  url: process.env.REDIS_URL,
-})
+const db = new redis(process.env.REDIS_URL)
 
 const getAsync = util.promisify(db.get).bind(db)
 const setAsync = util.promisify(db.set).bind(db)

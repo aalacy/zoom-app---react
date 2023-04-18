@@ -26,4 +26,12 @@ module.exports = {
     plaintextBytes = Buffer.concat([plaintextBytes, aes.final()])
     return plaintextBytes.toString()
   },
+
+  sha265Hash(plainToken){
+    var hmac = crypto.createHmac('sha256', process.env.WEBHOOK_SECRET_TOKEN);
+    //passing the data to be hashed
+    data = hmac.update(plainToken);
+    //Creating the hmac in the required format
+    return data.digest('hex');
+  }
 }

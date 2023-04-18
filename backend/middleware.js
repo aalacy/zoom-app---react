@@ -1,6 +1,6 @@
 const session = require('express-session')
 const SessionStore = require('connect-redis')(session)
-const redis = require('redis')
+const redis = require('ioredis')
 const store = require('./util/store')
 
 module.exports = {
@@ -32,9 +32,7 @@ module.exports = {
       maxAge: 365 * 24 * 60 * 60 * 1000,
     },
     store: new SessionStore({
-      client: redis.createClient({
-        url: process.env.REDIS_URL,
-      }),
+      client: new redis(process.env.REDIS_URL),
     }),
   }),
 

@@ -11,5 +11,6 @@ router
   .post('/onauthorized', controller.inClientOnAuthorized)
   .post('/recording-ended', controller.recordingEnded)
   .post('/recordingwebhook', controller.recordingWebhook)
+  .post('/deauthwebhook', controller.deauthorizeApp)
 
 module.exports = router
